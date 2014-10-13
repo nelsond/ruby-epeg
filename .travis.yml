@@ -4,9 +4,11 @@ rvm:
   - 1.9.3
   - 2.0
   - 2.1
-script: "rake"
+script: "bundle exec rake"
 gemfile:
   - Gemfile
 before_install:
   - uname -a
   - sudo apt-get install libexif-dev libjpeg8-dev
+  - gem -v
+  - gem install bundler -v '~> 1.7'

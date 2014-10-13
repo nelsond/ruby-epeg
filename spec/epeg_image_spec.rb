@@ -5,8 +5,8 @@ describe Epeg::Image do
   context "when loading an invalid jpeg file" do
     it "should raise an error" do
       invalid_jpeg = Tempfile.new(%w{invalid .jpg})
-      expect{ Epeg::Image.open(invalid_jpeg.path)      }.to raise_error
-      expect{ Epeg::Image.from_blob(invalid_jpeg.read) }.to raise_error
+      expect(lambda { Epeg::Image.open(invalid_jpeg.path)      }).to raise_error
+      expect(lambda { Epeg::Image.from_blob(invalid_jpeg.read) }).to raise_error
     end
   end
 
