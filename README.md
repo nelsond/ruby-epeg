@@ -1,4 +1,4 @@
-# ruby-epeg
+# ruby-epeg ![Travis CI - build status](https://travis-ci.org/nelsond/ruby-epeg.svg?branch=master)
 
 Ruby extension for the epeg library which provides facilities for scaling JPEG images very quickly.
 
