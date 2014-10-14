@@ -7,7 +7,7 @@ Ruby extension for the epeg library which provides facilities for scaling JPEG i
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'ruby-epeg'
+gem 'ruby-epeg', :require => 'epeg'
 ```
 
 And then execute:
