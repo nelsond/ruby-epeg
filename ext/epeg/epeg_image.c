@@ -27,7 +27,6 @@ void Init_epeg()
 
   rb_define_attr(cEpegImage, "width",   1, 0);
   rb_define_attr(cEpegImage, "height",  1, 0);
-  rb_define_attr(cEpegImage, "file_path",   1, 0);
 }
 
 /*
