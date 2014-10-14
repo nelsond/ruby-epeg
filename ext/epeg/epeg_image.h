@@ -14,6 +14,7 @@ static VALUE rb_epeg_image_resize(VALUE, VALUE, VALUE);
 static VALUE rb_epeg_image_resize_to_fit(VALUE, VALUE, VALUE);
 static VALUE rb_epeg_image_resize_to_fill(VALUE, VALUE, VALUE);
 static VALUE rb_epeg_image_crop(int, VALUE *, VALUE);
+static VALUE rb_epeg_image_get_or_set_quality(int, VALUE *, VALUE);
 static VALUE rb_epeg_image_set_quality(VALUE, VALUE);
 
 static VALUE rb_epeg_image_write(VALUE, VALUE);

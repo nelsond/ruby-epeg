@@ -104,6 +104,13 @@ describe Epeg::Image do
       expect(@image.quality).to eq(75)
     end
 
+    it "should set quality using chainable method" do
+      image = @image.quality(50)
+
+      expect(@image.quality).to eq(50)
+      expect(image).to be_kind_of(Epeg::Image)
+    end
+
     it "should set valid quality" do
       @image.quality = 100
       @image.write(@output_image.path)

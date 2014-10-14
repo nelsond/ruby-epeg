@@ -34,9 +34,7 @@ image = Epeg::Image.open("./some-image.jpg")
 # => some-image.jpeg is 1000x500
 
 # Resize the image to 50x50, set the quality to 50 and save it
-image.resize(50,50)
-image.quality = 50
-image.write("./some-other-image.jpg")
+image.resize(50,50).quality(50).write("./some-other-image.jpg")
 
 # The image is now closed and you can't do any further operations
 image.closed? # => true
