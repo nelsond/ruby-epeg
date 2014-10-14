@@ -170,7 +170,7 @@ static VALUE rb_epeg_image_resize_to_fit(VALUE self, VALUE w, VALUE h)
   const double image_height  = (double)NUM2INT(rb_iv_get(self, "@height"));
 
   const double fit_width     = (double)NUM2INT(w);
-  const double fit_height    = (double)NUM2INT(w);
+  const double fit_height    = (double)NUM2INT(h);
 
   const double width_ratio   = image_width/fit_width;
   const double height_ratio  = image_height/fit_height;
@@ -183,9 +183,9 @@ static VALUE rb_epeg_image_resize_to_fit(VALUE self, VALUE w, VALUE h)
   } else {
     if(width_ratio > height_ratio) {
       width  = fit_width;
-      height = (fit_height/width_ratio);
+      height = fit_width*(image_height/image_width);
     } else {
-      width  = (fit_height/height_ratio);
+      width  = fit_height*(image_width/image_height);
       height = fit_height;
     }
   }
@@ -210,7 +210,7 @@ static VALUE rb_epeg_image_resize_to_fill(VALUE self, VALUE w, VALUE h)
   const double image_height  = (double)NUM2INT(rb_iv_get(self, "@height"));
 
   const double fit_width     = (double)NUM2INT(w);
-  const double fit_height    = (double)NUM2INT(w);
+  const double fit_height    = (double)NUM2INT(h);
 
   const double width_ratio   = image_width/fit_width;
   const double height_ratio  = image_height/fit_height;
@@ -222,11 +222,11 @@ static VALUE rb_epeg_image_resize_to_fill(VALUE self, VALUE w, VALUE h)
     height = fit_width;
   } else {
     if(width_ratio > height_ratio) {
-      width  = fit_width*(width_ratio/height_ratio);
+      width  = fit_height*(image_width/image_height);
       height = fit_height;
     } else {
       width  = fit_width;
-      height = fit_height*(height_ratio/width_ratio);
+      height = fit_width*(image_height/image_width);
     }
   }
 
