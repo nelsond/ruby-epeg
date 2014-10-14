@@ -14,19 +14,19 @@ void Init_epeg()
 
   rb_define_method(cEpegImage, "initialize", rb_epeg_image_initialize,  0);
 
-  rb_define_method(cEpegImage, "resize",         rb_epeg_image_resize,         2);
-  rb_define_method(cEpegImage, "resize_to_fit",  rb_epeg_image_resize_to_fit,  2);
-  rb_define_method(cEpegImage, "resize_to_fill", rb_epeg_image_resize_to_fill, 2);
-  rb_define_method(cEpegImage, "crop",           rb_epeg_image_crop,          -1);
-  rb_define_method(cEpegImage, "write",          rb_epeg_image_write,          1);
-  rb_define_method(cEpegImage, "to_blob",        rb_epeg_image_to_blob,        0);
-  rb_define_method(cEpegImage, "close",          rb_epeg_image_close,          0);
-  rb_define_method(cEpegImage, "closed?",        rb_epeg_image_is_closed,      0);
-  rb_define_method(cEpegImage, "quality=",       rb_epeg_image_set_quality,    1);
+  rb_define_method(cEpegImage, "resize",         rb_epeg_image_resize,              2);
+  rb_define_method(cEpegImage, "resize_to_fit",  rb_epeg_image_resize_to_fit,       2);
+  rb_define_method(cEpegImage, "resize_to_fill", rb_epeg_image_resize_to_fill,      2);
+  rb_define_method(cEpegImage, "crop",           rb_epeg_image_crop,               -1);
+  rb_define_method(cEpegImage, "write",          rb_epeg_image_write,               1);
+  rb_define_method(cEpegImage, "to_blob",        rb_epeg_image_to_blob,             0);
+  rb_define_method(cEpegImage, "close",          rb_epeg_image_close,               0);
+  rb_define_method(cEpegImage, "closed?",        rb_epeg_image_is_closed,           0);
+  rb_define_method(cEpegImage, "quality",        rb_epeg_image_get_or_set_quality, -1);
+  rb_define_method(cEpegImage, "quality=",       rb_epeg_image_set_quality,         1);
 
   rb_define_attr(cEpegImage, "width",   1, 0);
   rb_define_attr(cEpegImage, "height",  1, 0);
-  rb_define_attr(cEpegImage, "quality", 1, 0);
   rb_define_attr(cEpegImage, "file_path",   1, 0);
 }
 
@@ -355,10 +355,32 @@ static VALUE rb_epeg_image_to_blob(VALUE self)
 
 /*
  * call-seq:
+ *  quality((q))
+ *
+ * Returns the image quality or sets it if +q+ is given.
+ * See Epeg::Image#quality=
+ */
+static VALUE rb_epeg_image_get_or_set_quality(int argc, VALUE *argv, VALUE self)
+{
+  if(argc > 1) {
+    rb_raise(rb_eArgError, "wrong number of arguments (%d for 0 or 1)", argc);
+  }
+
+  if(argc == 0) { return rb_iv_get(self, "@quality"); }
+
+  if(argc == 1) {
+    rb_epeg_image_set_quality(self, argv[0]);
+    return self;
+  }
+
+}
+
+/*
+ * call-seq:
  *  quality=(q)
  *
  * Sets the quality of the image to +q+ (+q+ >= 0 and +q+ <= 100).
- * See Epeg::Image.quality=
+ * See Epeg::Image#quality
  */
 static VALUE rb_epeg_image_set_quality(VALUE self, VALUE q)
 {
