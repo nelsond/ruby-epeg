@@ -116,6 +116,9 @@ static VALUE rb_epeg_image_initialize(VALUE self)
   epeg_quality_set(image, NUM2UINT(q));
   rb_iv_set(self, "@quality", q);
 
+  char *comment;
+  epeg_comment_set(image, (char *)NULL);
+
   unsigned int w, h;
   epeg_size_get(image, &w, &h);
 
