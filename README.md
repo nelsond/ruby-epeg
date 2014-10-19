@@ -23,8 +23,9 @@ Or install it yourself as:
 ```ruby
 require "epeg"
 
-# Set the global default jpeg quality
-Epeg::Image.quality = 90 # default is 85
+# Get and set the global default jpeg quality
+Epeg::Image.default_quality # => 85
+Epeg::Image.default_quality = 90
 
 # Create an image object from the file some-image.jpg
 image = Epeg::Image.open("./some-image.jpg")

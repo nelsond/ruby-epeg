@@ -7,10 +7,10 @@ void Init_epeg()
 
   rb_cv_set(cEpegImage, "@@quality", INT2NUM(85));
 
-  rb_define_singleton_method(cEpegImage, "from_blob", rb_epeg_image_from_blob,           1);
-  rb_define_singleton_method(cEpegImage, "open",      rb_epeg_image_open,                1);
-  rb_define_singleton_method(cEpegImage, "quality=",  rb_epeg_image_set_default_quality, 1);
-  rb_define_singleton_method(cEpegImage, "quality",   rb_epeg_image_get_default_quality, 0);
+  rb_define_singleton_method(cEpegImage, "from_blob",        rb_epeg_image_from_blob,           1);
+  rb_define_singleton_method(cEpegImage, "open",             rb_epeg_image_open,                1);
+  rb_define_singleton_method(cEpegImage, "default_quality=", rb_epeg_image_set_default_quality, 1);
+  rb_define_singleton_method(cEpegImage, "default_quality",  rb_epeg_image_get_default_quality, 0);
 
   rb_define_method(cEpegImage, "initialize", rb_epeg_image_initialize,  0);
 
@@ -69,12 +69,11 @@ static VALUE rb_epeg_image_from_blob(VALUE klass, VALUE blob)
 
 /*
  * call-seq:
- *  quality=(q)
+ *  default_quality=(q)
  *
  * Sets the default quality (+q+ >= 0 and +q+ <= 100)
- * See Epeg::Image#quality=
  *
- *     Epeg::Image.quality = 10
+ *     Epeg::Image.default_quality = 10
  */
 static VALUE rb_epeg_image_set_default_quality(VALUE klass, VALUE q)
 {
@@ -88,12 +87,11 @@ static VALUE rb_epeg_image_set_default_quality(VALUE klass, VALUE q)
 
 /*
  * call-seq:
- *  quality
+ *  default_quality
  *
  * Returns the current default quality for all images.
- * See Epeg::Image#quality
  *
- *     Epeg::Image.quality #=> 85
+ *     Epeg::Image.default_quality #=> 85
  */
 static VALUE rb_epeg_image_get_default_quality(VALUE klass)
 {

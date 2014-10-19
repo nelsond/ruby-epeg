@@ -12,7 +12,7 @@ describe Epeg::Image do
 
   context "when loading a valid jpeg file" do
     around(:each) do |example|
-      Epeg::Image.quality = 75
+      Epeg::Image.default_quality = 75
       @image = Epeg::Image.open(TEST_JPEG)
       @output_image = Tempfile.new(%w{out .jpg})
 
