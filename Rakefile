@@ -9,3 +9,7 @@ task :test    => :spec
 
 require "rake/extensiontask"
 Rake::ExtensionTask.new("epeg")
+
+task :valgrind => [:compile] do
+  system("valgrind --leak-check=yes ruby #{ROOT}/spec/runner.rb")
+end
