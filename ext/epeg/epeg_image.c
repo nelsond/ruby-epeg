@@ -100,7 +100,7 @@ static VALUE rb_epeg_image_get_default_quality(VALUE klass)
 
 /*
  * call-seq:
- *  intialize(file_path)
+ *  intialize()
  *
  * See Epeg::Image.open
  */
@@ -113,14 +113,13 @@ static VALUE rb_epeg_image_initialize(VALUE self)
   epeg_quality_set(image, NUM2UINT(q));
   rb_iv_set(self, "@quality", q);
 
-  char *comment;
   epeg_comment_set(image, (char *)NULL);
 
-  unsigned int w, h;
+  int w, h;
   epeg_size_get(image, &w, &h);
 
-  rb_iv_set(self, "@width",     UINT2NUM(w));
-  rb_iv_set(self, "@height",    UINT2NUM(h));
+  rb_iv_set(self, "@width",     INT2NUM(w));
+  rb_iv_set(self, "@height",    INT2NUM(h));
 
   rb_iv_set(self, "epeg_file_closed", Qfalse);
   rb_iv_set(self, "epeg_trimmed",     Qfalse);
@@ -353,7 +352,7 @@ static VALUE rb_epeg_image_to_blob(VALUE self)
   Epeg_Image *image;
   Data_Get_Struct(self, Epeg_Image, image);
 
-  unsigned char *data;
+  char *data;
   int size;
 
   epeg_memory_output_set(image, &data, &size);
