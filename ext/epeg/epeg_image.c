@@ -329,7 +329,6 @@ static VALUE rb_epeg_image_write(VALUE self, VALUE file_path)
   epeg_file_output_set(image, StringValueCStr(file_path));
   rb_epeg_image_encode_or_trim(self, image);
 
-  rb_iv_set(self, "epeg_file_closed", Qtrue);
   rb_epeg_image_close(self);
 
   return Qnil;
@@ -361,7 +360,6 @@ static VALUE rb_epeg_image_to_blob(VALUE self)
   VALUE blob = rb_str_new(data, size);
   free(data);
 
-  rb_iv_set(self, "epeg_file_closed", Qtrue);
   rb_epeg_image_close(self);
 
   return blob;
