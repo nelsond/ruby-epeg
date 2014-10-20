@@ -7,10 +7,10 @@ void Init_epeg()
 
   rb_cv_set(cEpegImage, "@@quality", INT2NUM(85));
 
-  rb_define_singleton_method(cEpegImage, "from_blob", rb_epeg_image_from_blob,           1);
-  rb_define_singleton_method(cEpegImage, "open",      rb_epeg_image_open,                1);
-  rb_define_singleton_method(cEpegImage, "quality=",  rb_epeg_image_set_default_quality, 1);
-  rb_define_singleton_method(cEpegImage, "quality",   rb_epeg_image_get_default_quality, 0);
+  rb_define_singleton_method(cEpegImage, "from_blob",        rb_epeg_image_from_blob,           1);
+  rb_define_singleton_method(cEpegImage, "open",             rb_epeg_image_open,                1);
+  rb_define_singleton_method(cEpegImage, "default_quality=", rb_epeg_image_set_default_quality, 1);
+  rb_define_singleton_method(cEpegImage, "default_quality",  rb_epeg_image_get_default_quality, 0);
 
   rb_define_method(cEpegImage, "initialize", rb_epeg_image_initialize,  0);
 
@@ -69,12 +69,11 @@ static VALUE rb_epeg_image_from_blob(VALUE klass, VALUE blob)
 
 /*
  * call-seq:
- *  quality=(q)
+ *  default_quality=(q)
  *
  * Sets the default quality (+q+ >= 0 and +q+ <= 100)
- * See Epeg::Image#quality=
  *
- *     Epeg::Image.quality = 10
+ *     Epeg::Image.default_quality = 10
  */
 static VALUE rb_epeg_image_set_default_quality(VALUE klass, VALUE q)
 {
@@ -88,12 +87,11 @@ static VALUE rb_epeg_image_set_default_quality(VALUE klass, VALUE q)
 
 /*
  * call-seq:
- *  quality
+ *  default_quality
  *
  * Returns the current default quality for all images.
- * See Epeg::Image#quality
  *
- *     Epeg::Image.quality #=> 85
+ *     Epeg::Image.default_quality #=> 85
  */
 static VALUE rb_epeg_image_get_default_quality(VALUE klass)
 {
@@ -102,7 +100,7 @@ static VALUE rb_epeg_image_get_default_quality(VALUE klass)
 
 /*
  * call-seq:
- *  intialize(file_path)
+ *  intialize()
  *
  * See Epeg::Image.open
  */
@@ -115,14 +113,13 @@ static VALUE rb_epeg_image_initialize(VALUE self)
   epeg_quality_set(image, NUM2UINT(q));
   rb_iv_set(self, "@quality", q);
 
-  char *comment;
   epeg_comment_set(image, (char *)NULL);
 
-  unsigned int w, h;
+  int w, h;
   epeg_size_get(image, &w, &h);
 
-  rb_iv_set(self, "@width",     UINT2NUM(w));
-  rb_iv_set(self, "@height",    UINT2NUM(h));
+  rb_iv_set(self, "@width",     INT2NUM(w));
+  rb_iv_set(self, "@height",    INT2NUM(h));
 
   rb_iv_set(self, "epeg_file_closed", Qfalse);
   rb_iv_set(self, "epeg_trimmed",     Qfalse);
@@ -235,7 +232,7 @@ static VALUE rb_epeg_image_resize_to_fill(VALUE self, VALUE w, VALUE h)
 
 /*
  * call-seq:
- *  cropp(w, h, (x, y))
+ *  cropp(w, h, [x, y])
  *
  * Crops image to +w+ x +h+. If +x+ and +y+ are not specified the image is
  * cropped with the center gravity.
@@ -246,27 +243,45 @@ static VALUE rb_epeg_image_crop(int argc, VALUE *argv, VALUE self)
     rb_raise(rb_eArgError, "wrong number of arguments (%d for 2 or 4)", argc);
   }
 
-  unsigned int w, h, x, y, i;
+  Check_Type(argv[0], T_FIXNUM);
+  Check_Type(argv[1], T_FIXNUM);
 
+  unsigned int w = NUM2UINT(argv[0]);
+  unsigned int h = NUM2UINT(argv[1]);
+
+  unsigned int iw = NUM2UINT(rb_iv_get(self, "@width"));
+  unsigned int ih = NUM2UINT(rb_iv_get(self, "@height"));
+
+  unsigned int x, y;
+
+  if(w > iw){ w = iw; }
+  if(h > ih){ h = ih; }
+
+  // crop with gravity = center
   if(argc == 2) {
-    for(i = 0; i < 2; i++) { Check_Type(argv[i], T_FIXNUM); }
-
-    w = NUM2UINT(argv[0]);
-    h = NUM2UINT(argv[1]);
-
-    x = (unsigned int)(   ceil(  (double)NUM2UINT( rb_iv_get(self, "@width")  )/2 ) - (double)w/2   );
-    y = (unsigned int)(   ceil(  (double)NUM2UINT( rb_iv_get(self, "@height") )/2 ) - (double)w/2   );
+    x = (int)(  ceil( ((double)iw - (double)w)/2 )  );
+    y = (int)(  ceil( ((double)ih - (double)h)/2 )  );
   }
 
+  // crop with origin at (x,y)
   if (argc == 4) {
-    for(i = 0; i < 4; i++) { Check_Type(argv[i], T_FIXNUM); }
+    Check_Type(argv[2], T_FIXNUM);
+    Check_Type(argv[3], T_FIXNUM);
 
-    w = NUM2UINT(argv[0]);
-    h = NUM2UINT(argv[1]);
-
-    x = NUM2UINT(argv[2]);
-    y = NUM2UINT(argv[3]);
+    x = NUM2INT(argv[2]);
+    y = NUM2INT(argv[3]);
   }
+
+  if (x >= iw) { x = iw - 1; }
+  if (y >= ih) { y = ih - 1; }
+
+  if (w + x >= iw) { w = iw - x; }
+  if (h + y >= ih) { h = ih - y; }
+
+  // FIXME: epeg doesn't seem to be able to set bounds to (0,0,iw,ih)
+  //        and encode/write the image to memory or file
+  if (w == iw) { w--; }
+  if (h == ih) { h--; }
 
   Epeg_Image *image;
   Data_Get_Struct(self, Epeg_Image, image);
@@ -289,7 +304,7 @@ static void rb_epeg_image_encode_or_trim(VALUE obj, Epeg_Image *image) {
     status = epeg_encode(image);
   }
 
-  if(status != 0) { rb_raise(rb_eRuntimeError, "Error: can't encode"); }
+  if(status != 0) {  rb_raise(rb_eRuntimeError, "Error: can't encode"); }
 }
 
 /*
@@ -314,7 +329,6 @@ static VALUE rb_epeg_image_write(VALUE self, VALUE file_path)
   epeg_file_output_set(image, StringValueCStr(file_path));
   rb_epeg_image_encode_or_trim(self, image);
 
-  rb_iv_set(self, "epeg_file_closed", Qtrue);
   rb_epeg_image_close(self);
 
   return Qnil;
@@ -337,7 +351,7 @@ static VALUE rb_epeg_image_to_blob(VALUE self)
   Epeg_Image *image;
   Data_Get_Struct(self, Epeg_Image, image);
 
-  unsigned char *data;
+  char *data;
   int size;
 
   epeg_memory_output_set(image, &data, &size);
@@ -346,7 +360,6 @@ static VALUE rb_epeg_image_to_blob(VALUE self)
   VALUE blob = rb_str_new(data, size);
   free(data);
 
-  rb_iv_set(self, "epeg_file_closed", Qtrue);
   rb_epeg_image_close(self);
 
   return blob;
