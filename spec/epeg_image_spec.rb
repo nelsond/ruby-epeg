@@ -92,6 +92,25 @@ describe Epeg::Image do
       expect(@cropped_image.to_blob).not_to eq(@another_cropped_image.to_blob)
     end
 
+    it "should not crop beyond image size" do
+      @image.crop(2000, 1000, 2000, 1000)
+      @image.write(@output_image.path)
+
+      @another_image = Epeg::Image.open(TEST_JPEG)
+      @another_image.crop(2000, 10000)
+      @another_output_image = Tempfile.new(%w{out2 .jpg})
+      @another_image.write(@another_output_image.path)
+
+      @cropped_image = Epeg::Image.open(@output_image.path)
+      @another_cropped_image = Epeg::Image.open(@another_output_image.path)
+
+      expect(@cropped_image.width ).to eq(1)
+      expect(@cropped_image.height).to eq(1)
+
+      expect(@another_cropped_image.width ).to eq(614)
+      expect(@another_cropped_image.height).to eq(767)
+    end
+
     it "should not write image after closing" do
       @image.close
 

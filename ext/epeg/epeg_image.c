@@ -233,7 +233,7 @@ static VALUE rb_epeg_image_resize_to_fill(VALUE self, VALUE w, VALUE h)
 
 /*
  * call-seq:
- *  cropp(w, h, (x, y))
+ *  cropp(w, h, [x, y])
  *
  * Crops image to +w+ x +h+. If +x+ and +y+ are not specified the image is
  * cropped with the center gravity.
@@ -244,27 +244,45 @@ static VALUE rb_epeg_image_crop(int argc, VALUE *argv, VALUE self)
     rb_raise(rb_eArgError, "wrong number of arguments (%d for 2 or 4)", argc);
   }
 
-  unsigned int w, h, x, y, i;
+  Check_Type(argv[0], T_FIXNUM);
+  Check_Type(argv[1], T_FIXNUM);
 
+  unsigned int w = NUM2UINT(argv[0]);
+  unsigned int h = NUM2UINT(argv[1]);
+
+  unsigned int iw = NUM2UINT(rb_iv_get(self, "@width"));
+  unsigned int ih = NUM2UINT(rb_iv_get(self, "@height"));
+
+  unsigned int x, y;
+
+  if(w > iw){ w = iw; }
+  if(h > ih){ h = ih; }
+
+  // crop with gravity = center
   if(argc == 2) {
-    for(i = 0; i < 2; i++) { Check_Type(argv[i], T_FIXNUM); }
-
-    w = NUM2UINT(argv[0]);
-    h = NUM2UINT(argv[1]);
-
-    x = (unsigned int)(   ceil(  (double)NUM2UINT( rb_iv_get(self, "@width")  )/2 ) - (double)w/2   );
-    y = (unsigned int)(   ceil(  (double)NUM2UINT( rb_iv_get(self, "@height") )/2 ) - (double)w/2   );
+    x = (int)(  ceil( ((double)iw - (double)w)/2 )  );
+    y = (int)(  ceil( ((double)ih - (double)h)/2 )  );
   }
 
+  // crop with origin at (x,y)
   if (argc == 4) {
-    for(i = 0; i < 4; i++) { Check_Type(argv[i], T_FIXNUM); }
+    Check_Type(argv[2], T_FIXNUM);
+    Check_Type(argv[3], T_FIXNUM);
 
-    w = NUM2UINT(argv[0]);
-    h = NUM2UINT(argv[1]);
-
-    x = NUM2UINT(argv[2]);
-    y = NUM2UINT(argv[3]);
+    x = NUM2INT(argv[2]);
+    y = NUM2INT(argv[3]);
   }
+
+  if (x >= iw) { x = iw - 1; }
+  if (y >= ih) { y = ih - 1; }
+
+  if (w + x >= iw) { w = iw - x; }
+  if (h + y >= ih) { h = ih - y; }
+
+  // FIXME: epeg doesn't seem to be able to set bounds to (0,0,iw,ih)
+  //        and encode/write the image to memory or file
+  if (w == iw) { w--; }
+  if (h == ih) { h--; }
 
   Epeg_Image *image;
   Data_Get_Struct(self, Epeg_Image, image);
@@ -287,7 +305,7 @@ static void rb_epeg_image_encode_or_trim(VALUE obj, Epeg_Image *image) {
     status = epeg_encode(image);
   }
 
-  if(status != 0) { rb_raise(rb_eRuntimeError, "Error: can't encode"); }
+  if(status != 0) {  rb_raise(rb_eRuntimeError, "Error: can't encode"); }
 }
 
 /*
