@@ -374,15 +374,15 @@ static VALUE rb_epeg_image_to_blob(VALUE self)
  */
 static VALUE rb_epeg_image_get_or_set_quality(int argc, VALUE *argv, VALUE self)
 {
-  if(argc > 1) {
-    rb_raise(rb_eArgError, "wrong number of arguments (%d for 0 or 1)", argc);
-  }
-
   if(argc == 0) { return rb_iv_get(self, "@quality"); }
 
-  if(argc == 1) {
+  else if(argc == 1) {
     rb_epeg_image_set_quality(self, argv[0]);
     return self;
+  }
+
+  else {
+    rb_raise(rb_eArgError, "wrong number of arguments (%d for 0 or 1)", argc);
   }
 
 }

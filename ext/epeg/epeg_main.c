@@ -901,6 +901,8 @@ _epeg_open_header(Epeg_Image *im)
      	}
 	return im;
     }
+
+   return NULL;
 }
 
 /**
